@@ -17,8 +17,7 @@ class Licoreria:
 class MyHandler(BaseRequestHandler):
     def handle(self):
         print"Connection from ",str(self.client_address)
-        SOCKETS_LIST.append(self.request)
-        longitudSockets= len(SOCKETS_LIST)        
+        SOCKETS_LIST.append(self.request)                
         host, port = self.client_address
         while True:
             con = 0        
@@ -29,17 +28,18 @@ class MyHandler(BaseRequestHandler):
             
             while flag1 == 2:
                 flag3 = 2
-                anuncio = self.request.send("Comprar o Consultar \n")
-                data = self.request.recv(1024)
+                anuncio = self.request.send("Comprar o Consultar \n")        
+                data = self.request.recv(1024)   
                 aux = data[:-2]
-                x = aux.split()
+                x = aux.split() 
                 print x
                 if x[0] == "consultar":
                     #longLista = len(listaAlcohol)
                     for i in listaAlcohol:
                         anuncio = self.request.send(i.consultar() + "\n")
                         print "entre a consultar"
-                        #anuncio = self.request.send("\n")      
+                        #anuncio = self.request.send("\n") 
+                    longitudSockets= len(SOCKETS_LIST)     
                     anuncio = self.request.send("Actualmente hay conectados: " + str(longitudSockets - 1) + " Clientes" + "\n")    
                 if x[0] == "comprar":                                   
                     nombre = x[1]                
@@ -63,7 +63,9 @@ class MyHandler(BaseRequestHandler):
     
             anuncio = self.request.send("Desea salir (Y/N) \n")
             cliente = self.request.recv(1024)
-            if cliente == "Y\r\n": break
+            if cliente == "Y\r\n": 
+                SOCKETS_LIST.remove(self.request)
+                break
         
 
 

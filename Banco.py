@@ -1,6 +1,7 @@
 
 
-from SocketServer import ThreadingTCPServer, BaseRequestHandler
+from SocketServer import ThreadingTCPServer, BaseRequestHandler, UDPServer
+from threading import Thread
 
 class Banco:
     def __init__(self, usuario, cuenta, password, saldo):
@@ -29,7 +30,7 @@ class MyHandler(BaseRequestHandler):
             flag1=2
             flag2=2
             flag3=2  
-            anuncio = self.request.send("Bienvenido al Banco Carola")
+            anuncio = self.request.send("Bienvenido al Banco Carola\n")
             anuncio = self.request.send(" Ingrese usuario:\n")
             cliente = self.request.recv(1024)
             if cliente == "chao\r\n": break
@@ -41,12 +42,12 @@ class MyHandler(BaseRequestHandler):
                     break
                 for i in listaOfUsers:                    
                     if(i.usuario+"\r\n" == cliente and i.password+"\r\n" == contrasena):
-                        anuncio = self.request.send("ingreso correctamente, Que desea hacer?\n") 
+                        anuncio = self.request.send("ingreso correctamente !!!, Que desea hacer?\n") 
                         while flag2 == 2:
-                            data= self.request.recv(1024)
+                            data= self.request.recv(1024) retirar 20000--> ['retirar', '2000']
                             aux= data[:-2]
-                            x= aux.split()
-                                                 
+                            x= aux.split()             
+
                             if x[0] == "retirar":
                                 i.retirar(int(x[1]))
                                 anuncio = self.request.send("Te quedan: "+str(i.saldo)+"\n")
@@ -63,6 +64,12 @@ class MyHandler(BaseRequestHandler):
 
         self.request.close()
     
+class MyHandlerUDP(BaseRequestHandler):
+    def handle(self):
+        print "Connection from ", str(self.client_address)
+        data, conn = self.request
+        conn.sendto(data.upper(),self.client_address)
+    
 
   
 user1 = Banco("Alejandro", "1234", "alejo97", 310000)
@@ -72,7 +79,16 @@ listaOfUsers=[user1,user2,user3]
 
 
 myServer = ThreadingTCPServer(("10.0.2.12",8885), MyHandler)
-myServer.serve_forever()
+myServerUDP = UDPServer(("10.0.2.12", 8880),MyHandlerUDP)
+
+t1 = Thread(target=myServer.serve_forever)
+t = Thread(target=myServerUDP.serve_forever)
+
+t1.start()
+t.start()
+
+t1.join()
+t.join()
 
 
 
