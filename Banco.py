@@ -10,10 +10,13 @@ class Banco:
         self.password = password
         self.saldo = saldo
     def retirar(self,cantidad):
-        if(self.saldo >= 0):
-            self.saldo = self.saldo - cantidad
+        print self.saldo, cantidad
+        if (self.saldo > cantidad):  
+            print "entre al sef retireae"      
+            self.saldo = self.saldo - cantidad      
+            return "si"      
         else:
-            return "No tiene fondos suficientes"
+            return "no"
     def consultar(self):
         return self.saldo
     def consignar(self,valor):
@@ -44,7 +47,7 @@ class MyHandler(BaseRequestHandler):
                     if(i.usuario+"\r\n" == cliente and i.password+"\r\n" == contrasena):
                         anuncio = self.request.send("ingreso correctamente !!!, Que desea hacer?\n") 
                         while flag2 == 2:
-                            data= self.request.recv(1024) retirar 20000--> ['retirar', '2000']
+                            data= self.request.recv(1024) 
                             aux= data[:-2]
                             x= aux.split()             
 
@@ -68,7 +71,32 @@ class MyHandlerUDP(BaseRequestHandler):
     def handle(self):
         print "Connection from ", str(self.client_address)
         data, conn = self.request
-        conn.sendto(data.upper(),self.client_address)
+        flag1=2
+        flag2=2
+        flag3=2
+        aux= data[:-2]
+        x= aux.split() 
+        cliente = x[1]
+        contrasena = x[2]
+        print cliente, contrasena, int(x[0])
+        while flag1 == 2:
+            for i in listaOfUsers:                    
+                    if(i.usuario == cliente and i.password == contrasena):
+                        print i.saldo
+                        a = i.retirar(int(x[0]))
+                        if a == "si":
+                            print "entreeeeeeeeeeeeeee al si "
+                            data = "si"
+                            conn.sendto(data,self.client_address)
+                            flag1 = 1
+                        else:
+                            data = "no"
+                            conn.sendto(data,self.client_address)
+                            flag1 = 1
+
+
+
+
     
 
   
@@ -78,7 +106,7 @@ user3 = Banco("Cristiano", "1234567", "alejo97", 310000)
 listaOfUsers=[user1,user2,user3]
 
 
-myServer = ThreadingTCPServer(("10.0.2.12",8885), MyHandler)
+myServer = ThreadingTCPServer(("10.0.2.12",8889), MyHandler)
 myServerUDP = UDPServer(("10.0.2.12", 8880),MyHandlerUDP)
 
 t1 = Thread(target=myServer.serve_forever)
