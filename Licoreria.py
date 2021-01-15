@@ -16,11 +16,16 @@ class Licoreria:
         valorPagar = cantidad * self.cost         
         return valorPagar
     def restaUnidades(self, cantidad):
-        if cantidad < self.quantity:
+        if cantidad <= self.quantity:
             self.quantity = self.quantity - cantidad
+        
+    def chequeo(self,cantidad1):
+        if self.quantity >= cantidad1:
+            #self.quantity = self.quantity - cantidad
             return "si"
-        else:
+        elif self.quantity < cantidad1:            
             return "no"
+
 
         
 class MyHandler(BaseRequestHandler):
@@ -32,6 +37,7 @@ class MyHandler(BaseRequestHandler):
         fila = 0
         matrizPago = array([["","",0]])
         listProducto = []
+        rtaCantidad=""
         dineroPagar = 0
         while True:
             con = 0        
@@ -92,39 +98,45 @@ class MyHandler(BaseRequestHandler):
                                 dataConexion = self.request.send("Digite su Usuario y Contrasena ( separada de espacios ) "+"\n")
                                 data = self.request.recv(1024) 
                                 ip = "10.0.2.12"
-                                port = 8880        
+                                port = 6789        
                                 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                                 while flag4==2:
                                     print "entre al while"
                                     for i in range (0,lenMatrizRow):     
                                         print "entre al for" , " ",  matrizPago1[i][1]                                 
                                         message = str(matrizPago1[i][1]) + " "+ data                                   
-                                        sock.sendto(message,("10.0.2.12",8880)) #le manda mensaje a banco cantidad a pagar + nombre + contrasena
-                                        response,remote_host = sock.recvfrom(1024)
-                                        print response 
-                                        rtaCantidad = j.restaUnidades(int(matrizPago1[i][2]))                                      
-                                        if response == "si" and rtaCantidad == "si" :
-                                            for j in listaAlcohol:
-                                                if(matrizPago1[i][0] == j.code):
-                                                    #j.restaUnidades(int(matrizPago1[i][2]))
-                                                    anuncio = self.request.send("Operacion realizada con exito !!!, tu pedido llegara lo mas pronto posible" + "\n")
-                                                    con = 0
-                                                    flag3 = 1
-                                                    flag4 = 1
-                                                    matrizPago = array([["","",0]])
-                                                    bandera = 2
-                                                    bandera2 = 2
-                                                    listProducto = []
-                                                    break
-                                        elif response == "no":
-                                            anuncio = self.request.send("No tienes fondos" + "\n")
-                                            flag3 = 1
-                                            flag4 = 1
-                                            matrizPago = array([["","",0]])
-                                            bandera = 2
-                                            bandera = 2
-                                            listProducto = []
-                                            break   
+                                        for j in listaAlcohol:
+                                            if(matrizPago1[i][0] == j.code):
+                                                rtaCantidad = j.chequeo(int(matrizPago1[i][2]))
+                                                #print "Esta es la respuesta del chequeo: ", rtaCantidad, int(matrizPago1[i][2]
+                                                              
+                                        if rtaCantidad == "si":
+                                            sock.sendto(message,("10.0.2.12",6789)) #le manda mensaje a banco cantidad a pagar + nombre + contrasena
+                                            response,remote_host = sock.recvfrom(1024)
+                                            print response 
+                                            if response == "si": 
+                                            
+                                                for j in listaAlcohol:
+                                                    if(matrizPago1[i][0] == j.code):
+                                                        j.restaUnidades(int(matrizPago1[i][2]))
+                                                        anuncio = self.request.send("Operacion realizada con exito !!!, tu pedido llegara lo mas pronto posible" + "\n")
+                                                        con = 0
+                                                        flag3 = 1
+                                                        flag4 = 1
+                                                        matrizPago = array([["","",0]])
+                                                        bandera = 2
+                                                        bandera2 = 2
+                                                        listProducto = []
+                                                        break
+                                            elif response == "no":
+                                                anuncio = self.request.send("No tienes fondos" + "\n")
+                                                flag3 = 1
+                                                flag4 = 1
+                                                matrizPago = array([["","",0]])
+                                                bandera = 2
+                                                bandera = 2
+                                                listProducto = []
+                                                break   
                                         elif rtaCantidad == "no":
                                             anuncio = self.request.send("No tienes Stock" + "\n")
                                             flag3 = 1
@@ -161,7 +173,7 @@ aguardiente = Licoreria("AguardienteAntioqueno", "Colombia", 9, 43000)
 vino = Licoreria("VinoRose","Francia", 7, 49000)
 
 listaAlcohol = [vodka, ron, whiskey, aguardiente, vino]
-myServer = ThreadingTCPServer(("10.0.2.12",3460), MyHandler)
+myServer = ThreadingTCPServer(("10.0.2.12",3463), MyHandler)
 SOCKETS_LIST = []
 SOCKETS_LIST.append(myServer)
 myServer.serve_forever()

@@ -106,8 +106,8 @@ user3 = Banco("Cristiano", "1234567", "alejo97", 310000)
 listaOfUsers=[user1,user2,user3]
 
 
-myServer = ThreadingTCPServer(("10.0.2.12",8889), MyHandler)
-myServerUDP = UDPServer(("10.0.2.12", 8880),MyHandlerUDP)
+myServer = ThreadingTCPServer(("10.0.2.12",8892), MyHandler)
+myServerUDP = UDPServer(("10.0.2.12", 6789),MyHandlerUDP)
 
 t1 = Thread(target=myServer.serve_forever)
 t = Thread(target=myServerUDP.serve_forever)
