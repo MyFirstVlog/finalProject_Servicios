@@ -2,7 +2,7 @@
 
 from SocketServer import ThreadingTCPServer, BaseRequestHandler, UDPServer
 from threading import Thread
-
+import string
 class Banco:
     def __init__(self, usuario, cuenta, password, saldo):
         self.id_cuenta= cuenta
@@ -68,16 +68,35 @@ class MyHandler(BaseRequestHandler):
         self.request.close()
     
 class MyHandlerUDP(BaseRequestHandler):
+
+    def decoding(text, n):
+        # alphabet "abcdefghijklmnopqrstuvwxyz"
+        intab = string.ascii_lowercase
+        # alphabet shifted by n positions
+        outtab = intab[n % 26:] + intab[:n % 26]
+        # translation made b/w patterns
+        trantab = string.maketrans(intab, outtab)
+        # text is shifted to right
+        return text.translate(trantab)
+
+
     def handle(self):
         print "Connection from ", str(self.client_address)
         data, conn = self.request
         flag1=2
         flag2=2
         flag3=2
-        aux= data[:-2]
+        aux= data
         x= aux.split() 
+        print "esto es lo que llega al banco", x
         cliente = x[1]
-        contrasena = x[2]
+        #descodificacion de la contrasena
+        intab = string.ascii_lowercase
+        outtab = intab[-3 % 26:] + intab[:-3 % 26]
+        trantab = string.maketrans(intab, outtab)
+        contrasena = x[2].translate(trantab)          
+        print "esta es la contra decodifcada",contrasena
+
         print cliente, contrasena, int(x[0])
         while flag1 == 2:
             for i in listaOfUsers:                    
@@ -100,9 +119,9 @@ class MyHandlerUDP(BaseRequestHandler):
     
 
   
-user1 = Banco("Alejandro", "1234", "alejo97", 310000)
-user2 = Banco("Carolina", "123456", "alejo97", 310000)
-user3 = Banco("Cristiano", "1234567", "alejo97", 310000)
+user1 = Banco("Alejandro", "1234", "alejo", 310000)
+user2 = Banco("Carolina", "123456", "alejo", 310000)
+user3 = Banco("Cristiano", "1234567", "alejo", 310000)
 listaOfUsers=[user1,user2,user3]
 
 

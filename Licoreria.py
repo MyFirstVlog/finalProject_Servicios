@@ -2,6 +2,7 @@ from SocketServer import ThreadingTCPServer, BaseRequestHandler, UDPServer
 import socket
 from numpy import *
 import numpy as np
+import string
 
 class Licoreria:
     def __init__(self, codigo, procedencia, unidades, costo):
@@ -25,10 +26,22 @@ class Licoreria:
             return "si"
         elif self.quantity < cantidad1:            
             return "no"
+    
 
 
         
 class MyHandler(BaseRequestHandler):
+
+    def coding(text, n):
+        # alphabet "abcdefghijklmnopqrstuvwxyz"
+        intab = string.ascii_lowercase
+        # alphabet shifted by n positions
+        outtab = intab[n % 26:] + intab[:n % 26]
+        # translation made b/w patterns
+        trantab = string.maketrans(intab, outtab)
+        # text is shifted to right
+        return text.translate(trantab)
+
     def handle(self):
         print"Connection from ",str(self.client_address)
         SOCKETS_LIST.append(self.request)                
@@ -97,14 +110,28 @@ class MyHandler(BaseRequestHandler):
                                 dataConexion = self.request.send("Estableciendo Conexiones con su Banco"+"\n")
                                 dataConexion = self.request.send("Digite su Usuario y Contrasena ( separada de espacios ) "+"\n")
                                 data = self.request.recv(1024) 
+                                aux3 = data.split()
+                                aux4 = aux3[1]
+                                print aux4
+
+                                intab = string.ascii_lowercase
+                                outtab = intab[3 % 26:] + intab[:3 % 26]
+                                trantab = string.maketrans(intab, outtab)
+                                contrasena = aux4.translate(trantab) 
+                                
+                                code = contrasena
+                                print "esta es la contra codificada: ", code
+                                data = aux3[0] + " " + code
+                                print "esta es la data que se envia a licoreria: ", data
                                 ip = "10.0.2.12"
                                 port = 6789        
                                 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                                 while flag4==2:
                                     print "entre al while"
                                     for i in range (0,lenMatrizRow):     
-                                        print "entre al for" , " ",  matrizPago1[i][1]                                 
-                                        message = str(matrizPago1[i][1]) + " "+ data                                   
+                                                                         
+                                        message = str(matrizPago1[i][1]) + " "+ data    
+                                        print "esto es lo que estoy enviando: ",  message                            
                                         for j in listaAlcohol:
                                             if(matrizPago1[i][0] == j.code):
                                                 rtaCantidad = j.chequeo(int(matrizPago1[i][2]))
@@ -144,6 +171,7 @@ class MyHandler(BaseRequestHandler):
                                             matrizPago = array([["","",0]])
                                             bandera = 2
                                             bandera = 2
+                                            con = 0
                                             listProducto = []
                                             break  
                                                                                    
@@ -173,7 +201,7 @@ aguardiente = Licoreria("AguardienteAntioqueno", "Colombia", 9, 43000)
 vino = Licoreria("VinoRose","Francia", 7, 49000)
 
 listaAlcohol = [vodka, ron, whiskey, aguardiente, vino]
-myServer = ThreadingTCPServer(("10.0.2.12",3463), MyHandler)
+myServer = ThreadingTCPServer(("10.0.2.12",3462), MyHandler)
 SOCKETS_LIST = []
 SOCKETS_LIST.append(myServer)
 myServer.serve_forever()
