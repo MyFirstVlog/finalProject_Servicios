@@ -69,17 +69,6 @@ class MyHandler(BaseRequestHandler):
     
 class MyHandlerUDP(BaseRequestHandler):
 
-    def decoding(text, n):
-        # alphabet "abcdefghijklmnopqrstuvwxyz"
-        intab = string.ascii_lowercase
-        # alphabet shifted by n positions
-        outtab = intab[n % 26:] + intab[:n % 26]
-        # translation made b/w patterns
-        trantab = string.maketrans(intab, outtab)
-        # text is shifted to right
-        return text.translate(trantab)
-
-
     def handle(self):
         print "Connection from ", str(self.client_address)
         data, conn = self.request
@@ -104,7 +93,7 @@ class MyHandlerUDP(BaseRequestHandler):
                         print i.saldo
                         a = i.retirar(int(x[0]))
                         if a == "si":
-                            print "entreeeeeeeeeeeeeee al si "
+                            print "entre al si "
                             data = "si"
                             conn.sendto(data,self.client_address)
                             flag1 = 1
@@ -125,8 +114,8 @@ user3 = Banco("Cristiano", "1234567", "alejo", 310000)
 listaOfUsers=[user1,user2,user3]
 
 
-myServer = ThreadingTCPServer(("10.0.2.12",8892), MyHandler)
-myServerUDP = UDPServer(("10.0.2.12", 6789),MyHandlerUDP)
+myServer = ThreadingTCPServer(("10.0.2.15",8892), MyHandler)
+myServerUDP = UDPServer(("10.0.2.15", 6789),MyHandlerUDP)
 
 t1 = Thread(target=myServer.serve_forever)
 t = Thread(target=myServerUDP.serve_forever)
