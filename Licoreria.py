@@ -3,6 +3,7 @@ import socket
 from numpy import *
 import numpy as np
 import string
+from sys import argv,exit
 
 class Licoreria:
     def __init__(self, codigo, procedencia, unidades, costo):   #constructor con atributos
@@ -112,8 +113,8 @@ class MyHandler(BaseRequestHandler):#clase de conexion
                                 print "esta es la contra codificada: ", code
                                 data = aux3[0] + " " + code
                                 print "esta es la data que se envia a licoreria: ", data
-                                ip = "10.0.2.12" #genero el socket udp para generar ña conexion con el banco
-                                port = 6789        
+                                ip = ip_socketUDP #genero el socket udp para generar la conexion con el banco
+                                port = port_UDP       
                                 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                                 while flag4==2:
                                     print "entre al while"
@@ -123,11 +124,12 @@ class MyHandler(BaseRequestHandler):#clase de conexion
                                         print "esto es lo que estoy enviando: ",  message                            
                                         for j in listaAlcohol: #aqui se verifica si hay stock en la licorera
                                             if(matrizPago1[i][0] == j.code):
+                                                
                                                 rtaCantidad = j.chequeo(int(matrizPago1[i][2]))
                                                 #print "Esta es la respuesta del chequeo: ", rtaCantidad, int(matrizPago1[i][2]
                                                               
                                         if rtaCantidad == "si":
-                                            sock.sendto(message,("10.0.2.12",6789)) #le manda mensaje a banco cantidad a pagar + nombre + contrasena
+                                            sock.sendto(message,(ip,port)) #le manda mensaje a banco cantidad a pagar + nombre + contrasena
                                             response,remote_host = sock.recvfrom(1024)
                                             print response 
                                             if response == "si": 
@@ -189,8 +191,13 @@ whiskey = Licoreria("WhiskeyMacallan", "Escocia", 3, 267000)
 aguardiente = Licoreria("AguardienteAntioqueno", "Colombia", 9, 43000)
 vino = Licoreria("VinoRose","Francia", 7, 49000)
 
+ip_socketUDP = str(argv[3])
+port_UDP = int(argv[4])
+port_TCP= int(argv[2])
+ip_TCP = str(argv[1])
+
 listaAlcohol = [vodka, ron, whiskey, aguardiente, vino]
-myServer = ThreadingTCPServer(("10.0.2.15",3462), MyHandler)
+myServer = ThreadingTCPServer((ip_TCP,port_TCP), MyHandler)
 SOCKETS_LIST = []
 SOCKETS_LIST.append(myServer)
 myServer.serve_forever()

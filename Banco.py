@@ -3,6 +3,7 @@
 from SocketServer import ThreadingTCPServer, BaseRequestHandler, UDPServer
 from threading import Thread
 import string
+from sys import argv,exit
 class Banco:
     def __init__(self, usuario, cuenta, password, saldo):
         self.id_cuenta= cuenta
@@ -11,7 +12,7 @@ class Banco:
         self.saldo = saldo
     def retirar(self,cantidad):
         print self.saldo, cantidad
-        if (self.saldo > cantidad):  
+        if (self.saldo >= cantidad):  
             print "entre al sef retireae"      
             self.saldo = self.saldo - cantidad      
             return "si"      
@@ -108,14 +109,18 @@ class MyHandlerUDP(BaseRequestHandler):
     
 
   
-user1 = Banco("Alejandro", "1234", "alejo", 310000)
-user2 = Banco("Carolina", "123456", "alejo", 310000)
-user3 = Banco("Cristiano", "1234567", "alejo", 310000)
+user1 = Banco("Alejandro", "1234", "alejo", 482000)
+user2 = Banco("Carolina", "123456", "alejo", 482000)
+user3 = Banco("Cristiano", "1234567", "alejo", 482000)
 listaOfUsers=[user1,user2,user3]
 
 
-myServer = ThreadingTCPServer(("10.0.2.15",8892), MyHandler)
-myServerUDP = UDPServer(("10.0.2.15", 6789),MyHandlerUDP)
+port_UDP = int(argv[3])
+port_TCP= int(argv[2])
+ip_TCP = str(argv[1])
+
+myServer = ThreadingTCPServer((ip_TCP,port_TCP), MyHandler)
+myServerUDP = UDPServer((ip_TCP, port_UDP),MyHandlerUDP)
 
 t1 = Thread(target=myServer.serve_forever)
 t = Thread(target=myServerUDP.serve_forever)
